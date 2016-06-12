@@ -23,10 +23,10 @@ void delay_ms(uint32_t delay)
 void lcd_clock(void)
 {
     // Pulse clock
-    delay_ms(5);
     gpio_set(LCD_PORT, LCD_CLOCK);
-    delay_ms(5);
+    delay_ms(1);
     gpio_clear(LCD_PORT, LCD_CLOCK);
+    delay_ms(1);
 }
 
 void lcd_setup(void)
