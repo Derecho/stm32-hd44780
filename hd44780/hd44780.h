@@ -1,6 +1,9 @@
 #include <stdint.h>
 
-void delay_ms(uint32_t delay);
+// It is recommended to supply your own delay function to the lcd_delay_ms
+// function pointer.
+
+void _lcd_delay_ms(uint32_t delay);
 void lcd_clock(void);
 void lcd_setup(void);
 void lcd_reset(void);

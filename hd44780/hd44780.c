@@ -11,8 +11,14 @@
 #define LCD_6 GPIO14
 #define LCD_7 GPIO15
 
-void delay_ms(uint32_t delay)
+// Use _lcd_delay_ms as our default delay function
+void (*lcd_delay_ms)(uint32_t) = _lcd_delay_ms;
+
+void _lcd_delay_ms(uint32_t delay)
 {
+    // Quick and ugly delay, inaccurate when microcontroller runs on a
+    // different speed, wastes too many cycles if interrupts occured.
+
     uint32_t cycles = (delay * 8000)/5;  // 8 Mhz, CMP+BEQ+NOP+ADDS+B
     uint32_t i = 0;
     while(i++ < cycles) {
@@ -24,9 +30,9 @@ void lcd_clock(void)
 {
     // Pulse clock
     gpio_set(LCD_PORT, LCD_CLOCK);
-    delay_ms(1);
+    lcd_delay_ms(1);
     gpio_clear(LCD_PORT, LCD_CLOCK);
-    delay_ms(1);
+    lcd_delay_ms(1);
 }
 
 void lcd_setup(void)
@@ -43,15 +49,19 @@ void lcd_reset(void)
     // Set everything low first
     gpio_clear(LCD_PORT, LCD_RS | LCD_CLOCK | LCD_4 | LCD_5 | LCD_6 | LCD_7);
 
-    // Reset strategy below as per wikipedia description, should recover
+    // Reset strategy below based on Wikipedia description, should recover
     // from any setting
 
-    // Write 0b0011 twice
+    // Write 0b0011 three times
+    // (Everyday Practical Electronics says 3 times, Wikipedia says 2 times,
+    // 3 seems to work better).
     gpio_set(LCD_PORT, LCD_5 | LCD_4);
     lcd_clock();
     lcd_clock();
+    lcd_clock();
+    // LCD now guaranteed to be in 8-bit state
 
-    // Now write 0b0010
+    // Now write 0b0010 (set to 4-bit mode, ready for first nibble)
     gpio_clear(LCD_PORT, LCD_4);
     lcd_clock();
 }
