@@ -14,6 +14,14 @@
 // Use _lcd_delay_ms as our default delay function
 void (*lcd_delay_ms)(uint32_t) = _lcd_delay_ms;
 
+// Various displays exist, don't make assumptions
+uint8_t lcd_chars = 0;
+uint8_t lcd_lines = 0;
+uint8_t *lcd_line_addresses = 0;
+// "Private" globals
+uint8_t _lcd_char = 0;
+uint8_t _lcd_line = 0;
+
 void _lcd_delay_ms(uint32_t delay)
 {
     // Quick and ugly delay, inaccurate when microcontroller runs on a
@@ -150,6 +158,14 @@ void lcd_write(uint8_t byte, uint8_t rs)
     lcd_clock();
 }
 
+void lcd_clear(void)
+{
+    // Clears display, resets cursor
+    lcd_write(0b00000001, 0);
+    _lcd_char = 0;
+    _lcd_line = 0;
+}
+
 void lcd_display_settings(uint8_t on, uint8_t underline, uint8_t blink)
 {
     // "Display On/Off & Cursor" command. All parameters must be either 0 or 1
@@ -157,10 +173,33 @@ void lcd_display_settings(uint8_t on, uint8_t underline, uint8_t blink)
     lcd_write(0b00001000 | (on << 2) | (underline << 1) | blink, 0);
 }
 
+void lcd_display_address(uint8_t address)
+{
+    lcd_write(0b10000000 | address, 0);
+}
+
 void lcd_print(char string[])
 {
     uint8_t i;
     for(i = 0; string[i] != 0; i++) {
-        lcd_write(string[i], 1);
+        // If we know the display properties and a newline character is
+        // present, print the rest of the string on the new line.
+        if(lcd_lines && string[i] == '\n') {
+            if(_lcd_line < lcd_lines) {
+                lcd_display_address(lcd_line_addresses[_lcd_line++]);
+                _lcd_char = 0;
+            }
+        }
+        else {
+            // If we know the display properties and have reached the end of
+            // line, print the rest on the next line
+            if(lcd_chars)
+                if((_lcd_char == lcd_chars) && (_lcd_line < lcd_lines)) {
+                    lcd_display_address(lcd_line_addresses[_lcd_line++]);
+                    _lcd_char = 0;
+                }
+            lcd_write(string[i], 1);
+            if(lcd_chars) _lcd_char++;
+        }
     }
 }
