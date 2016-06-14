@@ -12,6 +12,7 @@
 #define LCD_7 GPIO15
 
 // Use _lcd_delay_ms as our default delay function
+static void _lcd_delay_ms(uint32_t delay);
 void (*lcd_delay_ms)(uint32_t) = _lcd_delay_ms;
 
 // Various displays exist, don't make assumptions
@@ -22,7 +23,7 @@ uint8_t *lcd_line_addresses = 0;
 uint8_t _lcd_char = 0;
 uint8_t _lcd_line = 0;
 
-void _lcd_delay_ms(uint32_t delay)
+static void _lcd_delay_ms(uint32_t delay)
 {
     // Quick and ugly delay, inaccurate when microcontroller runs on a
     // different speed, wastes too many cycles if interrupts occured.

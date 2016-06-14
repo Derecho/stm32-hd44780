@@ -12,7 +12,6 @@ extern uint8_t lcd_chars;
 extern uint8_t lcd_lines;
 extern uint8_t *lcd_line_addresses;
 
-void _lcd_delay_ms(uint32_t delay);
 void lcd_clock(void);
 void lcd_setup(void);
 void lcd_reset(void);
