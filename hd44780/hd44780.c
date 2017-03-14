@@ -4,8 +4,8 @@
 
 #define LCD_PORT GPIOB
 #define LCD_RCC RCC_GPIOB
-#define LCD_RS GPIO10
-#define LCD_CLOCK GPIO11
+#define LCD_RS GPIO11
+#define LCD_CLOCK GPIO10
 #define LCD_4 GPIO12
 #define LCD_5 GPIO13
 #define LCD_6 GPIO14
